@@ -1,0 +1,26 @@
+---
+import Frame from './Frame.astro';
+import { t, projectUrl, type Lang } from '../i18n';
+interface Props { lang: Lang; p: any; big?: boolean }
+const { lang, p, big = false } = Astro.props;
+const d = p.data;
+const s = t[lang];
+const meta = [s.category[d.category as keyof typeof s.category], d.year, d.status !== 'released' ? s.status[d.status as keyof typeof s.status] : null].filter(Boolean).join(' · ');
+---
+<a class:list={['card', 'reveal', { big }]} href={projectUrl(lang, p.id)}>
+  <Frame title={d.title} image={d.still ?? d.poster} loop={d.loop} tint={d.tint} ratio={big ? '2.39 / 1' : '16 / 10'} />
+  <div class="card__txt">
+    <span class="kicker">{meta}</span>
+    <h3>{d.title}</h3>
+    <p class="muted">{d.logline[lang]}</p>
+  </div>
+</a>
+<style>
+  .card { display: grid; gap: 18px; text-decoration: none; }
+  .card:hover :global(img), .card:hover :global(video) { transform: scale(1.04); }
+  .card:hover h3 { color: var(--amber); }
+  h3 { font-size: clamp(30px, 3.4vw, 46px); margin: 8px 0 10px; transition: color 0.25s; }
+  .big h3 { font-size: clamp(40px, 5.5vw, 76px); }
+  p { max-width: 56ch; margin: 0; }
+  .big { grid-column: 1 / -1; }
+</style>

@@ -1,0 +1,10 @@
+---
+import { getCollection } from 'astro:content';
+import ProjectPage from '../../../components/ProjectPage.astro';
+export async function getStaticPaths() {
+  const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((p, i) => ({ params: { id: p.id }, props: { p, next: all[(i + 1) % all.length] } }));
+}
+const { p, next } = Astro.props;
+---
+<ProjectPage lang="en" p={p} next={next} />

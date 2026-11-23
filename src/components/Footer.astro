@@ -1,0 +1,28 @@
+---
+import { t, site, type Lang } from '../i18n';
+interface Props { lang: Lang }
+const s = t[Astro.props.lang];
+const year = new Date().getFullYear();
+---
+<footer class="ftr">
+  <div class="wrap ftr__in">
+    <div>
+      <div class="ftr__logo">Dreammill Productions</div>
+      <p class="muted">{s.tagline}</p>
+    </div>
+    <ul>
+      <li><a href={site.instagram} rel="me noopener">Instagram</a></li>
+      <li><a href={site.youtube} rel="me noopener">YouTube</a></li>
+      <li><a href={site.facebook} rel="me noopener">Facebook</a></li>
+    </ul>
+    <p class="muted small">© {year} Dreammill Productions · Helsinki / Los Angeles</p>
+  </div>
+</footer>
+<style>
+  .ftr { border-top: 1px solid var(--line); padding: 48px 0 56px; }
+  .ftr__in { display: grid; gap: 24px; grid-template-columns: 1fr auto; align-items: start; }
+  .ftr__logo { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; font-size: 14px; }
+  .small { grid-column: 1 / -1; font-size: 13px; margin: 0; }
+  @media (max-width: 640px) { .ftr__in { grid-template-columns: 1fr; } }
+</style>

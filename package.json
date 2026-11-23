@@ -1,0 +1,24 @@
+{
+  "name": "dreammill-web",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dreammill/dreammill-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dreammill/dreammill-web/issues"
+  },
+  "homepage": "https://github.com/Dreammill/dreammill-web#readme",
+  "dependencies": {
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "astro": "^7.4.13"
+  },
+  "private": true,
+  "type": "module"
+}
