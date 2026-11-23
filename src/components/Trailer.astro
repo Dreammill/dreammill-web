@@ -1,0 +1,44 @@
+---
+// Click-to-play YouTube trailer: no YouTube code loads until the visitor presses play.
+import Frame from './Frame.astro';
+interface Props { id?: string; title: string; image?: string; tint?: string; playLabel: string; noneLabel: string }
+const { id, title, image, tint, playLabel, noneLabel } = Astro.props;
+const thumb = image ?? (id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : undefined);
+---
+{id ? (
+  <div class="trailer" data-yt={id}>
+    <Frame title={title} image={thumb} tint={tint} ratio="16 / 9" />
+    <button class="play" type="button" aria-label={`${playLabel}: ${title}`}>
+      <span class="play__dot" aria-hidden="true"></span>{playLabel}
+    </button>
+  </div>
+) : (
+  <div class="trailer">
+    <Frame title={title} image={image} tint={tint} ratio="16 / 9" label={noneLabel} />
+  </div>
+)}
+<style>
+  .trailer { position: relative; }
+  .play {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 14px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.45), rgba(0,0,0,0.1)); border: 0; color: var(--paper);
+    font: 600 14px/1 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+  }
+  .play__dot { width: 72px; height: 72px; border-radius: 50%; border: 1.5px solid var(--paper); position: relative; transition: background 0.25s, border-color 0.25s; }
+  .play__dot::after { content: ''; position: absolute; left: 29px; top: 23px; border-left: 18px solid var(--paper); border-top: 13px solid transparent; border-bottom: 13px solid transparent; }
+  .play:hover .play__dot { background: var(--amber); border-color: var(--amber); }
+  .trailer :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>('.trailer[data-yt]').forEach((el) => {
+    el.querySelector('.play')?.addEventListener('click', () => {
+      const f = document.createElement('iframe');
+      f.src = `https://www.youtube-nocookie.com/embed/${el.dataset.yt}?autoplay=1&rel=0&modestbranding=1`;
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      f.title = 'Trailer';
+      el.appendChild(f);
+      el.querySelector('.play')?.remove();
+    });
+  });
+</script>

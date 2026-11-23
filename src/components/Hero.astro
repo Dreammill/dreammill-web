@@ -1,0 +1,55 @@
+---
+import { t, projectUrl, type Lang } from '../i18n';
+interface Props { lang: Lang; p: any }
+const { lang, p } = Astro.props;
+const d = p.data;
+const s = t[lang];
+const img = d.still ?? d.poster;
+---
+<section class="hero" style={`--tint:${d.tint}`}>
+  <div class="screen">
+    {d.loop ? (
+      <video src={d.loop} poster={img} autoplay muted loop playsinline aria-hidden="true"></video>
+    ) : img ? (
+      <img src={img} alt="" fetchpriority="high" />
+    ) : (
+      <div class="light" aria-hidden="true"><span></span><span></span><span></span></div>
+    )}
+    <div class="shade" aria-hidden="true"></div>
+  </div>
+  <div class="wrap hero__txt">
+    <span class="kicker">{s.status[d.status as keyof typeof s.status]} · {s.category[d.category as keyof typeof s.category]}{d.year ? ` · ${d.year}` : ''}</span>
+    <h1>{d.title}</h1>
+    {d.subtitle && <p class="sub">{d.subtitle}</p>}
+    <p class="log">{d.logline[lang]}</p>
+    <div class="cta">
+      <a class="btn btn--amber" href={projectUrl(lang, p.id)}>{d.trailer ? s.watchTrailer : s.heroCta.replace(/projektit|the projects/, d.title)}</a>
+      <a class="btn" href="#projektit">{s.projects}</a>
+    </div>
+  </div>
+  <p class="hero__studio wrap" aria-hidden="true">{s.heroKicker}</p>
+</section>
+<style>
+  .hero { position: relative; min-height: 100svh; display: grid; align-items: end; padding: 120px 0 clamp(56px, 9vh, 110px); overflow: hidden; isolation: isolate; }
+  .screen { position: absolute; inset: 0; z-index: -1; background: #050505; }
+  .screen img, .screen video { width: 100%; height: 100%; object-fit: cover; animation: drift 24s ease-in-out infinite alternate; }
+  .shade { position: absolute; inset: 0; background:
+    linear-gradient(0deg, var(--ink) 0%, rgba(11,11,12,0.6) 35%, rgba(11,11,12,0.1) 70%, rgba(11,11,12,0.55) 100%); }
+  /* projector light: drifting coloured glows + flicker, used until a real clip is added */
+  .light { position: absolute; inset: 0; background: #060606; animation: flicker 5s steps(30) infinite; }
+  .light span { position: absolute; border-radius: 50%; filter: blur(70px); mix-blend-mode: screen; }
+  .light span:nth-child(1) { width: 70vw; height: 60vh; left: 30%; top: 5%; background: color-mix(in srgb, var(--tint) 85%, #ffb347); opacity: 0.55; animation: f1 18s ease-in-out infinite alternate; }
+  .light span:nth-child(2) { width: 45vw; height: 45vh; left: 55%; top: 35%; background: #ffcf7a; opacity: 0.28; animation: f2 13s ease-in-out infinite alternate; }
+  .light span:nth-child(3) { width: 60vw; height: 30vh; left: -10%; top: 55%; background: color-mix(in srgb, var(--tint) 50%, #000); opacity: 0.7; animation: f1 21s ease-in-out infinite alternate-reverse; }
+  @keyframes f1 { to { transform: translate(-12vw, 6vh) scale(1.15); } }
+  @keyframes f2 { to { transform: translate(-20vw, -10vh) scale(0.85); } }
+  @keyframes flicker { 0%,100% { opacity: 1; } 47% { opacity: 0.93; } 52% { opacity: 1; } 78% { opacity: 0.96; } }
+  @keyframes drift { to { transform: scale(1.08) translateX(-1.5%); } }
+  .hero__txt { display: grid; gap: 14px; }
+  h1 { font-size: clamp(96px, 22vw, 300px); line-height: 0.82; margin: 6px 0 0 -0.04em; }
+  .sub { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.6vw, 34px); margin: 0; color: var(--paper-dim); }
+  .log { max-width: 46ch; font-size: clamp(17px, 1.5vw, 20px); margin: 6px 0 10px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero__studio { position: absolute; top: 96px; left: 0; right: 0; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-dim); }
+  @media (prefers-reduced-motion: reduce) { .light, .light span, .screen img, .screen video { animation: none; } }
+</style>

@@ -1,0 +1,109 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from './Hero.astro';
+import Frame from './Frame.astro';
+import ProjectCard from './ProjectCard.astro';
+import { t, site, projectUrl, type Lang } from '../i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t[lang];
+const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const featured = all.filter((p) => p.data.featured);
+const [lead, ...moreFeatured] = featured;
+const rest = all.filter((p) => !p.data.featured);
+const clients = ['Kansallisteatteri', 'Yle', 'MTV3', 'Fremantle', 'Metronome', 'Suunto', 'Hard Rock Cafe', 'Normet', 'Sanoma', 'Kirkon Ulkomaanapu'];
+---
+<Base lang={lang} altPath={lang === 'fi' ? '/en/' : '/'}>
+  {lead && <Hero lang={lang} p={lead} />}
+
+  {moreFeatured.map((p) => (
+    <section class="feature section">
+      <div class="wrap feature__in">
+        <div class="reveal">
+          <Frame title={p.data.title} image={p.data.still ?? p.data.poster} loop={p.data.loop} tint={p.data.tint} label={p.data.subtitle} />
+        </div>
+        <div class="feature__txt reveal">
+          <span class="kicker">{s.nowKicker} · {s.category[p.data.category]}{p.data.year ? ` · ${p.data.year}` : ''}</span>
+          <h2>{p.data.title}</h2>
+          {p.data.subtitle && <p class="sub">{p.data.subtitle}</p>}
+          <p>{p.data.logline[lang]}</p>
+          <a class="btn" href={projectUrl(lang, p.id)}>{p.data.trailer ? s.watchTrailer : s.heroCta.replace(/projektit|the projects/, p.data.title)}</a>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section id="projektit" class="section">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="kicker">Portfolio</span>
+        <h2>{s.projects}</h2>
+        <p class="muted">{s.projectsIntro}</p>
+      </div>
+      <div class="grid">
+        {rest.map((p) => <ProjectCard lang={lang} p={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="clients" aria-label={s.selectedWork}>
+    <div class="wrap">
+      <p class="kicker">{s.selectedWork}</p>
+      <ul>{clients.map((c) => <li>{c}</li>)}</ul>
+    </div>
+  </section>
+
+  <section id="kanava" class="section channel">
+    <div class="wrap channel__in">
+      <div class="mirror reveal" aria-hidden="true"><span>Peili</span><span>Peili</span></div>
+      <div class="reveal">
+        <span class="kicker">{s.channelKicker}</span>
+        <h2>{s.channelTitle}</h2>
+        <p>{s.channelText}</p>
+        {site.peiliChannel ? <a class="btn btn--amber" href={site.peiliChannel}>{s.channelCta}</a> : <span class="btn btn--amber" aria-disabled="true">{s.channelKicker.split('·')[1]}</span>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section about">
+    <div class="wrap about__in reveal">
+      <span class="kicker">{s.about}</span>
+      <p class="about__txt">{s.aboutText}</p>
+    </div>
+  </section>
+
+  <section id="yhteys" class="section contact">
+    <div class="wrap reveal">
+      <span class="kicker">{s.contact}</span>
+      <h2><a href={`mailto:${site.email}`}>{site.email}</a></h2>
+      <p class="muted">{s.contactText} · <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a></p>
+    </div>
+  </section>
+</Base>
+<style>
+  .feature { border-top: 1px solid var(--line); }
+  .feature__in { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
+  .feature__txt { display: grid; gap: 14px; justify-items: start; }
+  .feature h2 { font-size: clamp(56px, 8vw, 128px); }
+  .sub { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.4vw, 30px); color: var(--paper-dim); margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(40px, 6vw, 88px) clamp(20px, 3vw, 40px); }
+  .clients { border-block: 1px solid var(--line); padding: 40px 0; }
+  .clients ul { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 36px; font-family: var(--serif); font-size: clamp(22px, 2.6vw, 34px); color: var(--paper-dim); }
+  .channel__in { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .channel h2 { font-size: clamp(48px, 7vw, 104px); margin: 14px 0 22px; }
+  .channel p { max-width: 50ch; }
+  .mirror { aspect-ratio: 2.39 / 1; display: grid; grid-template-rows: 1fr 1fr; background: linear-gradient(180deg, #17171a, #0d0d0f); border: 1px solid var(--line); overflow: hidden; }
+  .mirror span { display: grid; place-items: center; font-family: var(--serif); font-size: clamp(56px, 9vw, 132px); line-height: 1; }
+  .mirror span:last-child { transform: scaleY(-1); opacity: 0.22; filter: blur(1.5px); background: linear-gradient(0deg, transparent, rgba(224,168,74,0.08)); }
+  .about { border-top: 1px solid var(--line); }
+  .about__in { display: grid; gap: 22px; }
+  .about__txt { font-family: var(--serif); font-size: clamp(28px, 3.8vw, 54px); line-height: 1.12; max-width: 24ch; margin: 0; }
+  .contact { border-top: 1px solid var(--line); }
+  .contact h2 { font-size: clamp(36px, 8vw, 120px); margin: 18px 0; overflow-wrap: anywhere; }
+  .contact h2 a { text-decoration: none; }
+  .contact h2 a:hover { color: var(--amber); }
+  @media (max-width: 860px) {
+    .feature__in, .channel__in, .grid { grid-template-columns: 1fr; }
+  }
+</style>

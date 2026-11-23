@@ -1,0 +1,81 @@
+---
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Trailer from './Trailer.astro';
+import Frame from './Frame.astro';
+import { t, projectUrl, homeUrl, type Lang } from '../i18n';
+interface Props { lang: Lang; p: any; next: any }
+const { lang, p, next } = Astro.props;
+const d = p.data;
+const s = t[lang];
+const other: Lang = lang === 'fi' ? 'en' : 'fi';
+const meta = [s.category[d.category as keyof typeof s.category], d.year, s.status[d.status as keyof typeof s.status]].filter(Boolean);
+const { Content } = await render(p);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': d.category === 'tv' ? 'TVSeries' : 'Movie',
+  name: d.title,
+  description: d.logline[lang],
+  ...(d.year ? { dateCreated: String(d.year) } : {}),
+  productionCompany: { '@type': 'Organization', name: 'Dreammill Productions' },
+  ...(d.credits.find((c: any) => /Ohjaus|Director/.test(c.role.fi + c.role.en)) ? { director: { '@type': 'Person', name: 'Harri Haanpää' } } : {}),
+};
+---
+<Base lang={lang} title={d.title} description={d.logline[lang]} altPath={projectUrl(other, p.id)} image={d.still ?? d.poster}>
+  <article>
+    <header class="ph wrap">
+      <a class="back" href={`${homeUrl(lang)}#projektit`}>← {s.back}</a>
+      <span class="kicker">{meta.join(' · ')}</span>
+      <h1>{d.title}</h1>
+      {d.subtitle && <p class="sub">{d.subtitle}</p>}
+      <p class="log">{d.logline[lang]}</p>
+    </header>
+    <div class="wrap">
+      <Trailer id={d.trailer} title={d.title} image={d.still} tint={d.tint} playLabel={s.playTrailer} noneLabel={s.noTrailer} />
+    </div>
+    <div class="wrap body">
+      <div class="desc">
+        <p>{d.description[lang]}</p>
+        <Content />
+      </div>
+      <aside>
+        {d.poster && <Frame title={d.title} image={d.poster} ratio="2 / 3" />}
+        {d.credits.length > 0 && (
+          <dl>
+            <dt class="kicker">{s.credits}</dt>
+            {d.credits.map((c: any) => (<div><dd class="muted">{c.role[lang]}</dd><dd>{c.name}</dd></div>))}
+          </dl>
+        )}
+        {d.partners.length > 0 && (
+          <dl><dt class="kicker">{s.partners}</dt>{d.partners.map((x: string) => <dd>{x}</dd>)}</dl>
+        )}
+      </aside>
+    </div>
+    {next && (
+      <a class="next wrap" href={projectUrl(lang, next.id)}>
+        <span class="kicker">{s.next}</span>
+        <span class="next__t">{next.data.title} →</span>
+      </a>
+    )}
+  </article>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />
+</Base>
+<style>
+  .ph { padding-top: 140px; padding-bottom: clamp(32px, 5vw, 64px); display: grid; gap: 14px; }
+  .back { font-size: 14px; text-decoration: none; color: var(--paper-dim); margin-bottom: 18px; }
+  .back:hover { color: var(--amber); }
+  h1 { font-size: clamp(64px, 13vw, 200px); line-height: 0.85; }
+  .sub { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.6vw, 34px); color: var(--paper-dim); margin: 0; }
+  .log { max-width: 52ch; font-size: clamp(18px, 1.6vw, 22px); margin: 8px 0 0; }
+  .body { display: grid; grid-template-columns: 1.6fr 1fr; gap: clamp(32px, 6vw, 96px); padding-top: clamp(40px, 6vw, 80px); padding-bottom: clamp(56px, 8vw, 120px); }
+  .desc { font-size: clamp(18px, 1.5vw, 21px); max-width: 62ch; }
+  aside { display: grid; gap: 32px; align-content: start; }
+  dl { margin: 0; display: grid; gap: 12px; }
+  dt { margin-bottom: 4px; }
+  dd { margin: 0; }
+  dl div { display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .next { display: grid; gap: 10px; padding-top: 56px; padding-bottom: 88px; border-top: 1px solid var(--line); text-decoration: none; }
+  .next__t { font-family: var(--serif); font-size: clamp(44px, 7vw, 104px); line-height: 1; }
+  .next:hover .next__t { color: var(--amber); }
+  @media (max-width: 860px) { .body { grid-template-columns: 1fr; } }
+</style>
